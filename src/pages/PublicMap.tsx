@@ -47,7 +47,7 @@ export const PublicMap: React.FC = () => {
   };
 
   const isMapLocked = map?.isLocked || (map?.editableUntil ? map.editableUntil.toDate() <= new Date() : false);
-  const isMapCreator = user && map && user.uid === map.ownerId;
+  const isMapCreator = !!(user && map && user.uid === map.ownerId);
 
   if (mapLoading) {
     return (

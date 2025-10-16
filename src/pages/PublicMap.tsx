@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { MapView } from '../components/map/MapView';
+import { MapView, MapViewRef } from '../components/map/MapView';
+import { CitySearchBar } from '../components/map/CitySearchBar';
 import { useMapData, useShareLink } from '../hooks/useMapData';
 import { useMapPins } from '../hooks/useMapPins';
 import { useAddPin } from '../hooks/useAddPin';
 import { useDeletePin } from '../hooks/useDeletePin';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/ui/ToastProvider';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 
 export const PublicMap: React.FC = () => {
   const { mapId } = useParams<{ mapId: string }>();
   const { user } = useAuth();
+  const { showToast } = useToast();
+  const mapRef = useRef<MapViewRef>(null);
   
   const { map, loading: mapLoading, error: mapError } = useMapData(mapId || '');
   const { pins } = useMapPins(mapId || '');
@@ -46,6 +50,27 @@ export const PublicMap: React.FC = () => {
     }
   };
 
+  const handleCitySelect = async (city: { lat: number; lng: number; name: string }) => {
+    if (mapRef.current && !isMapLocked) {
+      try {
+        await addPin({ lat: city.lat, lng: city.lng, name: city.name });
+        showToast(`Pin added successfully at ${city.name}!`, 'success');
+        
+        // Center the map on the newly added pin
+        if (mapRef.current.centerMapOnLocation) {
+          mapRef.current.centerMapOnLocation(city.lat, city.lng);
+        }
+      } catch (error) {
+        console.error('Failed to add pin:', error);
+        showToast('Failed to add pin. Please try again.', 'error');
+      }
+    }
+  };
+
+  const handlePinAdded = (pinName: string) => {
+    // No toast notification for manual map clicks
+  };
+
   const isMapLocked = map?.isLocked || (map?.editableUntil ? map.editableUntil.toDate() <= new Date() : false);
   const isMapCreator = !!(user && map && user.uid === map.ownerId);
 
@@ -74,41 +99,54 @@ export const PublicMap: React.FC = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">{map.name}</h1>
-            <p className="text-sm text-gray-500">
-              {pins.length} pin{pins.length !== 1 ? 's' : ''} • 
-              {isMapLocked ? ' Locked' : ' Open for pins'}
-              {isMapCreator && ' • You are the map creator'}
-            </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-3">
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">{map.name}</h1>
+              <p className="text-sm text-gray-500">
+                {pins.length} pin{pins.length !== 1 ? 's' : ''} • 
+                {isMapLocked ? ' Locked' : ' Open for pins'}
+                {isMapCreator && ' • You are the map creator'}
+              </p>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleGenerateShareLink}
+                disabled={linkLoading}
+              >
+                {linkLoading ? 'Generating...' : 'Share Link'}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => window.location.href = '/'}
+              >
+                Home
+              </Button>
+            </div>
           </div>
           
-          <div className="flex space-x-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleGenerateShareLink}
-              disabled={linkLoading}
-            >
-              {linkLoading ? 'Generating...' : 'Share Link'}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => window.location.href = '/'}
-            >
-              Home
-            </Button>
-          </div>
+          {!isMapLocked && (
+            <div className="flex justify-center">
+              <CitySearchBar 
+                onCitySelect={handleCitySelect}
+                disabled={isMapLocked}
+              />
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex-1 relative">
         <MapView
+          ref={mapRef}
           mapId={mapId || ''}
           pins={pins}
           onAddPin={addPin}
           onDeletePin={isMapCreator ? deletePin : undefined}
+          onPinAdded={handlePinAdded}
           isLocked={isMapLocked}
           canDeletePins={isMapCreator}
         />

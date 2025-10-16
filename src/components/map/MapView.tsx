@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useImperativeHandle, forwardRef, useRef } from 'react';
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import { Pin } from '../../types';
 import { PinMarker } from './PinMarker';
@@ -10,10 +10,16 @@ interface MapViewProps {
   pins: Pin[];
   onAddPin: (pin: { lat: number; lng: number; name: string; description?: string }) => Promise<void>;
   onDeletePin?: (pinId: string) => Promise<void>;
+  onPinAdded?: (pinName: string) => void;
   isLocked: boolean;
   canDeletePins?: boolean;
   center?: [number, number];
   zoom?: number;
+}
+
+export interface MapViewRef {
+  addPinAtLocation: (lat: number, lng: number, name: string) => void;
+  centerMapOnLocation: (lat: number, lng: number) => void;
 }
 
 const MapClickHandler: React.FC<{ onMapClick: (lat: number, lng: number) => void }> = ({ onMapClick }) => {
@@ -25,17 +31,32 @@ const MapClickHandler: React.FC<{ onMapClick: (lat: number, lng: number) => void
   return null;
 };
 
-export const MapView: React.FC<MapViewProps> = ({ 
+export const MapView = forwardRef<MapViewRef, MapViewProps>(({ 
   pins, 
   onAddPin, 
   onDeletePin,
+  onPinAdded,
   isLocked, 
   canDeletePins = false,
   center = [40.7128, -74.0060], 
   zoom = 13 
-}) => {
+}, ref) => {
   const [showAddPinForm, setShowAddPinForm] = useState(false);
   const [clickedPosition, setClickedPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const mapRef = useRef<any>(null);
+
+  useImperativeHandle(ref, () => ({
+    addPinAtLocation: (lat: number, lng: number, name: string) => {
+      if (!isLocked) {
+        onAddPin({ lat, lng, name });
+      }
+    },
+    centerMapOnLocation: (lat: number, lng: number) => {
+      if (mapRef.current) {
+        mapRef.current.setView([lat, lng], 13);
+      }
+    }
+  }));
 
   const handleMapClick = (lat: number, lng: number) => {
     if (!isLocked) {
@@ -46,12 +67,19 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const handleAddPin = async (pinData: { name: string; description?: string }) => {
     if (clickedPosition) {
-      await onAddPin({
-        ...clickedPosition,
-        ...pinData
-      });
-      setShowAddPinForm(false);
-      setClickedPosition(null);
+      try {
+        await onAddPin({
+          ...clickedPosition,
+          ...pinData
+        });
+        if (onPinAdded) {
+          onPinAdded(pinData.name);
+        }
+        setShowAddPinForm(false);
+        setClickedPosition(null);
+      } catch (error) {
+        console.error('Failed to add pin:', error);
+      }
     }
   };
 
@@ -64,6 +92,7 @@ export const MapView: React.FC<MapViewProps> = ({
   return (
     <div className="h-full w-full relative">
       <MapContainer
+        ref={mapRef}
         center={center}
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
@@ -109,4 +138,4 @@ export const MapView: React.FC<MapViewProps> = ({
       )}
     </div>
   );
-};
+});

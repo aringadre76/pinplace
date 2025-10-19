@@ -2,14 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { MapView, MapViewRef } from '../components/map/MapView';
 import { CitySearchBar } from '../components/map/CitySearchBar';
+// import { Chatbot } from '../components/chatbot/Chatbot';
 import { useMapData, useShareLink } from '../hooks/useMapData';
 import { useMapPins } from '../hooks/useMapPins';
 import { useAddPin } from '../hooks/useAddPin';
 import { useDeletePin } from '../hooks/useDeletePin';
+import { useDeleteAllPins } from '../hooks/useDeleteAllPins';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/ToastProvider';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { getMapCenter } from '../lib/spatial';
 
 export const PublicMap: React.FC = () => {
   const { mapId } = useParams<{ mapId: string }>();
@@ -21,10 +24,12 @@ export const PublicMap: React.FC = () => {
   const { pins } = useMapPins(mapId || '');
   const { addPin } = useAddPin(mapId || '');
   const { deletePin } = useDeletePin(mapId || '');
+  const { deleteAllPins } = useDeleteAllPins(mapId || '');
   const { generateShareLink, loading: linkLoading } = useShareLink(mapId || '');
   
   const [shareLink, setShareLink] = useState<string>('');
   const [showShareModal, setShowShareModal] = useState(false);
+  // const [highlightedPins, setHighlightedPins] = useState<string[]>([]);
 
   useEffect(() => {
     if (mapId) {
@@ -68,11 +73,46 @@ export const PublicMap: React.FC = () => {
   };
 
   const handlePinAdded = (pinName: string) => {
-    // No toast notification for manual map clicks
+    showToast(`Pin added successfully at ${pinName}!`, 'success');
   };
+
+  const handleDeleteAllPins = async () => {
+    if (!isMapCreator) {
+      showToast('Only the map creator can delete all pins.', 'error');
+      return;
+    }
+
+    if (pins.length === 0) {
+      showToast('There are no pins to delete.', 'error');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete all ${pins.length} pins? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const deletedCount = await deleteAllPins();
+      showToast(`Successfully deleted ${deletedCount} pins!`, 'success');
+    } catch (error) {
+      console.error('Failed to delete all pins:', error);
+      showToast('Failed to delete all pins. Please try again.', 'error');
+    }
+  };
+
+  // const handleHighlightPins = (pinIds: string[]) => {
+  //   setHighlightedPins(pinIds);
+  // };
+
+  // const handleMoveMap = (center: { lat: number; lng: number }, zoom?: number) => {
+  //   if (mapRef.current && mapRef.current.centerMapOnLocation) {
+  //     mapRef.current.centerMapOnLocation(center.lat, center.lng, zoom);
+  //   }
+  // };
 
   const isMapLocked = map?.isLocked || (map?.editableUntil ? map.editableUntil.toDate() <= new Date() : false);
   const isMapCreator = !!(user && map && user.uid === map.ownerId);
+  const mapCenter = getMapCenter(pins);
 
   if (mapLoading) {
     return (
@@ -111,6 +151,16 @@ export const PublicMap: React.FC = () => {
             </div>
             
             <div className="flex space-x-2">
+              {isMapCreator && pins.length > 0 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleDeleteAllPins}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Delete All Pins
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="sm"
@@ -150,6 +200,17 @@ export const PublicMap: React.FC = () => {
           isLocked={isMapLocked}
           canDeletePins={isMapCreator}
         />
+        
+        {/* <Chatbot
+          pins={pins}
+          mapCenter={mapCenter}
+          mapName={map.name}
+          isLocked={isMapLocked}
+          onHighlightPins={handleHighlightPins}
+          onMoveMap={handleMoveMap}
+          onAddPin={addPin}
+          onPinAdded={handlePinAdded}
+        /> */}
       </div>
 
       {showShareModal && (

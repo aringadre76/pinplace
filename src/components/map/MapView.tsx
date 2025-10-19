@@ -19,7 +19,7 @@ interface MapViewProps {
 
 export interface MapViewRef {
   addPinAtLocation: (lat: number, lng: number, name: string) => void;
-  centerMapOnLocation: (lat: number, lng: number) => void;
+  centerMapOnLocation: (lat: number, lng: number, zoom?: number) => void;
 }
 
 const MapClickHandler: React.FC<{ onMapClick: (lat: number, lng: number) => void }> = ({ onMapClick }) => {
@@ -51,9 +51,9 @@ export const MapView = forwardRef<MapViewRef, MapViewProps>(({
         onAddPin({ lat, lng, name });
       }
     },
-    centerMapOnLocation: (lat: number, lng: number) => {
+    centerMapOnLocation: (lat: number, lng: number, zoom?: number) => {
       if (mapRef.current) {
-        mapRef.current.setView([lat, lng], 13);
+        mapRef.current.setView([lat, lng], zoom || 13);
       }
     }
   }));

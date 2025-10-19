@@ -1,5 +1,5 @@
 import { Pin } from '../types';
-import { calculateDistance, findPinsInRadius, getMapCenter, getMapBounds, Point, SpatialQuery } from './spatial';
+import { calculateDistance, findPinsInRadius, Point } from './spatial';
 import { directionsService } from './directions';
 import { geocodingService } from './geocoding';
 

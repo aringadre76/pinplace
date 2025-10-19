@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/ToastProvider';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { getMapCenter } from '../lib/spatial';
+// import { getMapCenter } from '../lib/spatial';
 
 export const PublicMap: React.FC = () => {
   const { mapId } = useParams<{ mapId: string }>();
@@ -112,7 +112,7 @@ export const PublicMap: React.FC = () => {
 
   const isMapLocked = map?.isLocked || (map?.editableUntil ? map.editableUntil.toDate() <= new Date() : false);
   const isMapCreator = !!(user && map && user.uid === map.ownerId);
-  const mapCenter = getMapCenter(pins);
+  // const mapCenter = getMapCenter(pins);
 
   if (mapLoading) {
     return (

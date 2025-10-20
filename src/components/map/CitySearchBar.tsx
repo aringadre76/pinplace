@@ -145,6 +145,8 @@ export const CitySearchBar: React.FC<CitySearchBarProps> = ({
     <div className="relative w-full max-w-md">
       <Input
         ref={inputRef}
+        id="city-search"
+        name="city-search"
         placeholder="Search for a city..."
         value={query}
         onChange={handleInputChange}

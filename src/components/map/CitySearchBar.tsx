@@ -35,7 +35,7 @@ export const CitySearchBar: React.FC<CitySearchBarProps> = ({
 
     try {
       const response = await fetch(
-        `/api/nominatim/q=${encodeURIComponent(searchQuery)}&limit=5`
+        `/api/nominatim?q=${encodeURIComponent(searchQuery)}&limit=5`
       );
       
       if (!response.ok) {
@@ -44,23 +44,7 @@ export const CitySearchBar: React.FC<CitySearchBarProps> = ({
       
       const data = await response.json();
       
-      return data
-        .filter((item: any) => 
-          item.class === 'place' || 
-          item.type === 'city' || 
-          item.type === 'town' || 
-          item.type === 'village' ||
-          item.type === 'administrative' ||
-          (item.address && (item.address.city || item.address.town || item.address.village))
-        )
-        .map((item: any) => ({
-          name: item.name || item.display_name.split(',')[0],
-          country: item.address?.country || 'Unknown',
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-          displayName: item.display_name
-        }))
-        .slice(0, 5);
+      return data;
     } catch (error) {
       console.error('Error searching cities:', error);
       return [];

@@ -35,10 +35,10 @@ export const Navbar: React.FC = () => {
               <h1 className="text-xl font-bold text-blue-600">pinplace</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-2">
               {user ? (
                 <>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 hidden sm:inline truncate max-w-[150px] md:max-w-none">
                     {user.email}
                   </span>
                   <Button variant="secondary" size="sm" onClick={handleLogout}>

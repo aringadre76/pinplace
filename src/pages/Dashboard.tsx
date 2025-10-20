@@ -119,12 +119,12 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Maps</h1>
           <p className="text-gray-600">Manage your collaborative maps</p>
         </div>
-        <Button onClick={() => navigate('/create')}>
+        <Button onClick={() => navigate('/create')} className="w-full sm:w-auto">
           Create New Map
         </Button>
       </div>
@@ -164,14 +164,14 @@ export const Dashboard: React.FC = () => {
               </p>
 
               <div className="space-y-2">
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <Button
                     size="sm"
-                    variant="secondary"
+                    variant="primary"
                     onClick={() => navigate(`/map/${map.id}`)}
-                    className="flex-1"
+                    className="col-span-2"
                   >
-                    View
+                    View Map
                   </Button>
                   <Button
                     size="sm"
@@ -187,25 +187,21 @@ export const Dashboard: React.FC = () => {
                   >
                     Delete
                   </Button>
-                </div>
-                <div className="flex gap-2">
                   <Button
                     size="sm"
                     variant="secondary"
                     onClick={() => handleExportCSV(map)}
                     disabled={exportingMapId === map.id}
-                    className="flex-1"
                   >
-                    {exportingMapId === map.id ? 'Exporting...' : 'Export CSV'}
+                    {exportingMapId === map.id ? 'Exporting...' : 'CSV'}
                   </Button>
                   <Button
                     size="sm"
                     variant="secondary"
                     onClick={() => handleExportKML(map)}
                     disabled={exportingMapId === map.id}
-                    className="flex-1"
                   >
-                    {exportingMapId === map.id ? 'Exporting...' : 'Export KML'}
+                    {exportingMapId === map.id ? 'Exporting...' : 'KML'}
                   </Button>
                 </div>
               </div>

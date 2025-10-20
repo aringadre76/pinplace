@@ -140,23 +140,23 @@ export const PublicMap: React.FC = () => {
     <div className="h-screen flex flex-col">
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-3">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">{map.name}</h1>
-              <p className="text-sm text-gray-500">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{map.name}</h1>
+              <p className="text-xs sm:text-sm text-gray-500">
                 {pins.length} pin{pins.length !== 1 ? 's' : ''} • 
                 {isMapLocked ? ' Locked' : ' Open for pins'}
                 {isMapCreator && ' • You are the map creator'}
               </p>
             </div>
             
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap sm:flex-nowrap gap-2">
               {isMapCreator && pins.length > 0 && (
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={handleDeleteAllPins}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm flex-1 sm:flex-none"
                 >
                   Delete All Pins
                 </Button>
@@ -166,12 +166,14 @@ export const PublicMap: React.FC = () => {
                 size="sm"
                 onClick={handleGenerateShareLink}
                 disabled={linkLoading}
+                className="flex-1 sm:flex-none"
               >
-                {linkLoading ? 'Generating...' : 'Share Link'}
+                {linkLoading ? 'Generating...' : 'Share'}
               </Button>
               <Button
                 size="sm"
                 onClick={() => window.location.href = '/'}
+                className="flex-1 sm:flex-none"
               >
                 Home
               </Button>
@@ -179,7 +181,7 @@ export const PublicMap: React.FC = () => {
           </div>
           
           {!isMapLocked && (
-            <div className="flex justify-center">
+            <div className="w-full">
               <CitySearchBar 
                 onCitySelect={handleCitySelect}
                 disabled={isMapLocked}

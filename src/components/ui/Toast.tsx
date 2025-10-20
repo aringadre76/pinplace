@@ -64,23 +64,25 @@ export const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 max-w-sm w-full bg-white border rounded-lg shadow-lg transition-all duration-300 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+      className={`fixed bottom-4 left-4 right-4 sm:top-4 sm:bottom-auto sm:left-auto sm:right-4 z-[9999] sm:max-w-sm w-auto bg-white border rounded-lg shadow-xl transition-all duration-300 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
       } ${getTypeStyles()}`}
+      style={{ zIndex: 9999 }}
     >
       <div className="flex items-start p-4">
         <div className="flex-shrink-0 mr-3">
           {getIcon()}
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium">{message}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium break-words">{message}</p>
         </div>
         <button
           onClick={() => {
             setIsVisible(false);
             setTimeout(onClose, 300);
           }}
-          className="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600 active:text-gray-700 transition-colors touch-manipulation min-w-[24px] min-h-[24px] flex items-center justify-center"
+          aria-label="Close notification"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />

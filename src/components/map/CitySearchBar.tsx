@@ -101,7 +101,7 @@ export const CitySearchBar: React.FC<CitySearchBarProps> = ({
   };
 
   const handleCitySelect = (city: CityResult) => {
-    setQuery(city.displayName);
+    setQuery('');
     setShowResults(false);
     setResults([]);
     onCitySelect(city);
@@ -183,10 +183,10 @@ export const CitySearchBar: React.FC<CitySearchBarProps> = ({
           {results.map((city, index) => (
             <div
               key={`${city.name}-${city.country}-${city.lat}-${city.lng}-${index}`}
-              className={`px-3 py-2 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+              className={`px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0 active:scale-[0.98] transition-transform ${
                 index === selectedIndex 
                   ? 'bg-blue-50 text-blue-900' 
-                  : 'hover:bg-gray-50'
+                  : 'hover:bg-gray-50 active:bg-gray-100'
               }`}
               onClick={() => handleCitySelect(city)}
             >

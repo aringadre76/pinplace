@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/nominatim/(.*)",
+      "destination": "https://nominatim.openstreetmap.org/search?format=json&$1&addressdetails=1&extratags=1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

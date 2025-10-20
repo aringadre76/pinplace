@@ -35,7 +35,7 @@ export const CitySearchBar: React.FC<CitySearchBarProps> = ({
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&addressdetails=1&extratags=1`
+        `/api/nominatim/q=${encodeURIComponent(searchQuery)}&limit=5`
       );
       
       if (!response.ok) {

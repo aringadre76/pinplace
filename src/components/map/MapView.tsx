@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle, forwardRef, useRef } from 'react';
+import React, { useState, useImperativeHandle, forwardRef, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import { Pin } from '../../types';
 import { PinMarker } from './PinMarker';
@@ -43,7 +43,31 @@ export const MapView = forwardRef<MapViewRef, MapViewProps>(({
 }, ref) => {
   const [showAddPinForm, setShowAddPinForm] = useState(false);
   const [clickedPosition, setClickedPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [showLockedNotification, setShowLockedNotification] = useState(false);
+  const [notificationOpacity, setNotificationOpacity] = useState(1);
   const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (isLocked) {
+      setShowLockedNotification(true);
+      setNotificationOpacity(1);
+      
+      const fadeTimer = setTimeout(() => {
+        setNotificationOpacity(0);
+      }, 2500);
+      
+      const hideTimer = setTimeout(() => {
+        setShowLockedNotification(false);
+      }, 3000);
+      
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(hideTimer);
+      };
+    } else {
+      setShowLockedNotification(false);
+    }
+  }, [isLocked]);
 
   useImperativeHandle(ref, () => ({
     addPinAtLocation: (lat: number, lng: number, name: string) => {
@@ -126,13 +150,18 @@ export const MapView = forwardRef<MapViewRef, MapViewProps>(({
         />
       )}
 
-      {isLocked && (
-        <div className="absolute top-4 left-4 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg shadow-sm">
-          <div className="flex items-center">
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      {showLockedNotification && (
+        <div 
+          className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg shadow-sm max-w-[calc(100%-1rem)] sm:max-w-none transition-opacity duration-500"
+          style={{ opacity: notificationOpacity }}
+        >
+          <div className="flex items-start gap-2">
+            <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
             </svg>
-            Map is locked - no new pins can be added
+            <span className="text-xs sm:text-sm font-medium leading-tight">
+              Map is locked - no new pins can be added
+            </span>
           </div>
         </div>
       )}
